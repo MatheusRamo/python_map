@@ -27,24 +27,18 @@ def components():
     for data in df['Data'].unique():
         datas_unicas.append(data.date())
 
+    
+    
+    # html = '<div class="container"> <div class="mapa-pequeno"> mapa pequeno </div> <div class="mapa-grande">'
+
     # Adicione um marcador para cada prisma
     for prisma in df['Prisma'].unique():
         df_prisma = df[df['Prisma'] == prisma]
 
         # Use a última localização disponível para o marcador
         location = df_prisma.iloc[-1][['Latitude', 'Longitude']]
-        datas_scrool = " "
 
-        # for data in datas_unicas:
-        #     datas_scrool += f"""
-        #                 <div style="display: inline-block; width:150px; height: 20px; margin: 10px; border: 1px solid black;padding: 10px;">
-        #                     {data}
-        #                 </div> 
-        #         """
-            
-
-        # Crie uma string HTML com as diferenças de elevação para cada dia
-        html = '<div style="white-space: nowrap; overflow-x: auto;">' + datas_scrool + '</div>' + '<h3>' + prisma + '</h3>'
+        html = '<h3>' + prisma + '</h3>'
         for i, row in df_prisma.iterrows():
             html += f"""
             <h4> Data:  { str(row['Data'].date())} </h4>
@@ -54,16 +48,11 @@ def components():
                 <li><b>Elevação:</b> {str(round(row['Elevacao'], 5))} </li>
             </ul>
             """
-        iframe = folium.IFrame(html=html, width=500, height=500)
-        popup = folium.Popup(iframe, max_width=500)
+        iframe = folium.IFrame(html=html, width=400, height=400)
+        popup = folium.Popup(iframe, max_width=400)
         # Adicione o marcador ao mapa
         folium.Marker(location, popup=popup).add_to(m)
-
-
-
-
-
-
+    
     m.get_root().render()
     header = m.get_root().header.render()
     body_html = m.get_root().html.render()
@@ -74,11 +63,35 @@ def components():
             <!DOCTYPE html>
             <html>
                 <head>
+                <style>
+                    body, html {
+                        margin: 0;
+                        padding: 0;
+                        height: 100%;
+                        width: 100%;
+                    }
+                    .container {
+                        display: flex;
+                        height: 100vh;
+                        width: 100vw;
+                    }
+                    .mapa-grande {
+                        flex: 70%;
+                        background-size: cover;
+                    }
+                    .mapa-pequeno {
+                        flex: 30%;
+                        background-size: cover;
+                    }
+                </style>
                     {{ header|safe }}
                 </head>
                 <body>
-                    <h1>Using components</h1>
-                    {{ body_html|safe }}
+                    <h1>Campo Grande</h1>
+                   
+                       {{ body_html|safe }}
+
+                    
                     <script>
                         {{ script|safe }}
                     </script>
