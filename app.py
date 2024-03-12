@@ -9,12 +9,13 @@ app = Flask(__name__)
 def components():
 
     df = pd.read_csv('dados_prismas.csv')
-    # Converta a coluna 'Data' para o tipo de data
+    # Converte a coluna 'Data' para o tipo de data
     df['Data'] = pd.to_datetime(df['Data'],  format='%d/%m/%Y')
-    print(df['Data'])
+    
+    #ordenar as datas
     df = df.sort_values('Data')
 
-    # Crie um mapa centrado na média de suas coordenadas
+    # Cria um mapa centrado na média de suas coordenadas
     m = folium.Map(location=[df['Latitude'].mean(), df['Longitude'].mean()], zoom_start=17, tiles = None)
     folium.TileLayer(tiles = "cartodbpositron").add_to(m)
     folium.TileLayer(tiles = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
@@ -23,22 +24,14 @@ def components():
 
     folium.LayerControl().add_to(m)
 
-    datas_unicas = []
-    for data in df['Data'].unique():
-        datas_unicas.append(data.date())
-
-    
-    
-    # html = '<div class="container"> <div class="mapa-pequeno"> mapa pequeno </div> <div class="mapa-grande">'
-
-    # Adicione um marcador para cada prisma
+    # Adiciona um marcador para cada prisma
     for prisma in df['Prisma'].unique():
         df_prisma = df[df['Prisma'] == prisma]
 
-        # Use a última localização disponível para o marcador
+        # Usa a última localização disponível para o marcador
         location = df_prisma.iloc[-1][['Latitude', 'Longitude']]
 
-        html = '<h3>' + prisma + '</h3>'
+        html = f'<h3 id="{prisma}"> {prisma} </h3>'
         for i, row in df_prisma.iterrows():
             html += f"""
             <h4> Data:  { str(row['Data'].date())} </h4>
@@ -50,7 +43,8 @@ def components():
             """
         iframe = folium.IFrame(html=html, width=400, height=400)
         popup = folium.Popup(iframe, max_width=400)
-        # Adicione o marcador ao mapa
+
+        # Adiciona o marcador ao mapa
         folium.Marker(location, popup=popup).add_to(m)
     
     m.get_root().render()
@@ -87,7 +81,6 @@ def components():
                     {{ header|safe }}
                 </head>
                 <body>
-                    <h1>Campo Grande</h1>
                    
                        {{ body_html|safe }}
 
@@ -102,7 +95,6 @@ def components():
         body_html=body_html,
         script=script,
     )
-
 
 if __name__ == "__main__":
     app.run(debug=True)
